@@ -1,35 +1,35 @@
-import { Resolver, Query, Ctx, Arg, Mutation } from 'type-graphql';
-import { Post } from '../entities/Post';
-import { MyContext } from 'src/types';
+import {Resolver, Query, Ctx, Arg, Mutation} from 'type-graphql';
+import {Post} from '../entities/Post';
+import {MyContext} from 'src/types';
 
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  posts(@Ctx() { em }: MyContext) {
+  posts(@Ctx() {em}: MyContext) {
     return em.find(Post, {});
   }
 
   // Ctx - декоратор аргумента для получения контекста
   // Arg - декоратор аргумента для аргумента запроса
-  @Query(() => Post, { nullable: true })
-  post(@Arg('id') id: number, @Ctx() { em }: MyContext) {
-    return em.findOne(Post, { id });
+  @Query(() => Post, {nullable: true})
+  post(@Arg('id') id: number, @Ctx() {em}: MyContext) {
+    return em.findOne(Post, {id});
   }
 
   @Mutation(() => Post)
-  async createPost(@Arg('title') title: string, @Ctx() { em }: MyContext) {
-    const post = em.create(Post, { title });
+  async createPost(@Arg('title') title: string, @Ctx() {em}: MyContext) {
+    const post = em.create(Post, {title});
     await em.persistAndFlush(post);
     return post;
   }
 
-  @Mutation(() => Post, { nullable: true })
+  @Mutation(() => Post, {nullable: true})
   async updatePost(
     @Arg('id') id: number,
-    @Arg('title', () => String, { nullable: true }) title: string,
-    @Ctx() { em }: MyContext
+    @Arg('title', () => String, {nullable: true}) title: string,
+    @Ctx() {em}: MyContext
   ) {
-    const post = await em.findOne(Post, { id });
+    const post = await em.findOne(Post, {id});
     if (!post) {
       return null;
     }
@@ -41,9 +41,9 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean)
-  async deletePost(@Arg('id') id: number, @Ctx() { em }: MyContext) {
+  async deletePost(@Arg('id') id: number, @Ctx() {em}: MyContext) {
     try {
-      await em.nativeDelete(Post, { id });
+      await em.nativeDelete(Post, {id});
     } catch (err) {
       console.error(err);
       return false;

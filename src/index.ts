@@ -1,13 +1,14 @@
 import 'reflect-metadata'; // описывает ошибки type-graphql
-import { MikroORM } from '@mikro-orm/core'; // бд модели
-import { __prod__ } from './constants';
-import { Post } from './entities/Post';
+import {MikroORM} from '@mikro-orm/core'; // бд модели
+import {__prod__} from './constants';
+import {Post} from './entities/Post';
 import microConfig from './mikro-orm.config';
 import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
-import { buildSchema } from 'type-graphql';
-import { HelloResolver } from './resolvers/hello';
-import { PostResolver } from './resolvers/post';
+import {ApolloServer} from 'apollo-server-express';
+import {buildSchema} from 'type-graphql';
+import {HelloResolver} from './resolvers/hello';
+import {PostResolver} from './resolvers/post';
+import {UserResolver} from './resolvers/user';
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -17,14 +18,14 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver],
+      resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
     // объект будет доступен из резалверов graphql
-    context: () => ({ em: orm.em }),
+    context: () => ({em: orm.em}),
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({app});
 
   app.listen(4000, () => {
     console.log('Server is up on port 4000');
@@ -37,4 +38,4 @@ const main = async () => {
   // console.log(post);
 };
 
-main().catch((err) => console.log(err));
+main().catch(err => console.log(err));
