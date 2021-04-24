@@ -7,11 +7,11 @@ import path from 'path';
 
 export default {
   entities: [Post, User],
-  dbName: 'handmade-reddit',
+  dbName: process.env.DBNAME,
   debug: !__prod__,
   type: 'postgresql',
-  user: 'admin',
-  password: 'redditucks',
+  user: process.env.DBUSER,
+  password: process.env.DBPASSWORD,
   migrations: {
     tableName: 'mikro_orm_migrations', // name of database table with log of executed transactions
     path: path.join(__dirname, './migrations'), // path to the folder with migrations

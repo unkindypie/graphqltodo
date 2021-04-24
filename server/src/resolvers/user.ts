@@ -6,6 +6,7 @@ import {
   Arg,
   Ctx,
   ObjectType,
+  Query,
 } from 'type-graphql';
 import {MyContext} from '../types';
 import {User} from '../entities/User';
@@ -41,11 +42,23 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Query(() => UserResponse, {nullable: false})
+  async me(@Ctx() {req, em}: MyContext) {
+    if (!req.session.userId) {
+      return {
+        errors: [{message: 'User is not authenticated', field: 'userId'}],
+      };
+    }
+    const user = await em.findOne(User, {id: req.session.userId});
+
+    return {user};
+  }
+
   // тут как аргумент используется объект с помощью InputType декоратора
   @Mutation(() => User)
   async register(
     @Arg('options') options: UsernamePasswordInput,
-    @Ctx() {em}: MyContext
+    @Ctx() {em, req}: MyContext
   ) {
     const hashedPassword = await argon2.hash(options.password);
     const user = await em.create(User, {
@@ -53,13 +66,16 @@ export class UserResolver {
       password: hashedPassword,
     });
     await em.persistAndFlush(user);
+
+    req.session.userId = user.id;
+
     return user;
   }
 
   @Mutation(() => UserResponse)
   async login(
     @Arg('options') options: UsernamePasswordInput,
-    @Ctx() {em}: MyContext
+    @Ctx() {em, req}: MyContext
   ) {
     const user = await em.findOne(User, {username: options.username});
     if (!user) {
@@ -91,6 +107,8 @@ export class UserResolver {
         ],
       };
     }
+
+    req.session.userId = user.id;
 
     await em.persistAndFlush(user);
     return {user};
