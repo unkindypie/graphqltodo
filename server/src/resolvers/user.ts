@@ -55,11 +55,23 @@ export class UserResolver {
   }
 
   // тут как аргумент используется объект с помощью InputType декоратора
-  @Mutation(() => User)
+  @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,
     @Ctx() {em, req}: MyContext
   ) {
+    const existingUser = await em.findOne(User, {username: options.username});
+    if (existingUser) {
+      return {
+        errors: [
+          {
+            field: 'username',
+            message: 'Username already taken.',
+          },
+        ],
+      };
+    }
+
     const hashedPassword = await argon2.hash(options.password);
     const user = await em.create(User, {
       username: options.username,
@@ -69,7 +81,7 @@ export class UserResolver {
 
     req.session.userId = user.id;
 
-    return user;
+    return {user};
   }
 
   @Mutation(() => UserResponse)
@@ -112,5 +124,21 @@ export class UserResolver {
 
     await em.persistAndFlush(user);
     return {user};
+  }
+
+  @Mutation(() => Boolean)
+  async logout(@Ctx() {req, res}: MyContext) {
+    return new Promise(resolve =>
+      req.session.destroy(err => {
+        res.clearCookie(process.env.AUTH_COOKIE_NAME as string);
+
+        if (err) {
+          console.log(err);
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
+    );
   }
 }

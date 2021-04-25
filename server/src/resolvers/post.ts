@@ -1,12 +1,14 @@
 import {Resolver, Query, Ctx, Arg, Mutation} from 'type-graphql';
 import {Post} from '../entities/Post';
 import {MyContext} from 'src/types';
+import {sleep} from '../utils/sleep';
 
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  posts(@Ctx() {em}: MyContext) {
-    return em.find(Post, {});
+  async posts(@Ctx() {em}: MyContext) {
+    // await sleep(2000);
+    return await em.find(Post, {});
   }
 
   // Ctx - декоратор аргумента для получения контекста

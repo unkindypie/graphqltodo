@@ -13,6 +13,7 @@ import session from 'express-session';
 import connectRedis from 'connect-redis';
 import {__prod__} from './constants';
 import {MyContext} from './types';
+import cors from 'cors';
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -23,9 +24,13 @@ const main = async () => {
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient();
 
+  // глобально настариваю корс
+  app.use(cors({origin: 'http://localhost:3000', credentials: true}));
+
+  // редис/куки
   app.use(
     session({
-      name: 'qid',
+      name: process.env.AUTH_COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,
@@ -42,6 +47,7 @@ const main = async () => {
     })
   );
 
+  // аполо/graphql
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
@@ -51,7 +57,7 @@ const main = async () => {
     context: ({req, res}): MyContext => ({em: orm.em, req: req as any, res}),
   });
 
-  apolloServer.applyMiddleware({app});
+  apolloServer.applyMiddleware({app, cors: false});
 
   app.listen(process.env.PORT, () => {
     console.log(`Server is up on port ${process.env.PORT}`);
