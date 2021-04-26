@@ -5,8 +5,7 @@ import microConfig from './mikro-orm.config';
 import express from 'express';
 import {ApolloServer} from 'apollo-server-express';
 import {buildSchema} from 'type-graphql';
-import {HelloResolver} from './resolvers/hello';
-import {PostResolver} from './resolvers/post';
+import {TaskResolver} from './resolvers/task';
 import {UserResolver} from './resolvers/user';
 import redis from 'redis';
 import session from 'express-session';
@@ -50,7 +49,7 @@ const main = async () => {
   // аполо/graphql
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver, UserResolver],
+      resolvers: [TaskResolver, UserResolver],
       validate: false,
     }),
     // объект будет доступен из резалверов graphql
@@ -62,12 +61,10 @@ const main = async () => {
   app.listen(process.env.PORT, () => {
     console.log(`Server is up on port ${process.env.PORT}`);
   });
-
-  // const post = orm.em.create(Post, { title: 'foo' });
-  // await orm.em.persistAndFlush(post);
-
-  // const post = await orm.em.find(Post, {});
-  // console.log(post);
 };
 
 main().catch(err => console.log(err));
+
+process.once('SIGUSR2', () => {
+  process.kill(process.pid, 'SIGUSR2');
+});

@@ -54,7 +54,6 @@ export class UserResolver {
     return {user};
   }
 
-  // тут как аргумент используется объект с помощью InputType декоратора
   @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,

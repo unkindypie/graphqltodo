@@ -1,12 +1,15 @@
-import {MikroORM} from '@mikro-orm/core';
+require('dotenv').config();
 
-import {Post} from './entities/Post';
-import {User} from './entities/User';
-import {__prod__} from './constants';
+import {MikroORM} from '@mikro-orm/core';
 import path from 'path';
 
+import {Task} from './entities/Task';
+import {User} from './entities/User';
+import {TaskKind} from './entities/TaskKind';
+import {__prod__} from './constants';
+
 export default {
-  entities: [Post, User],
+  entities: [Task, TaskKind, User],
   dbName: process.env.DBNAME,
   debug: !__prod__,
   type: 'postgresql',

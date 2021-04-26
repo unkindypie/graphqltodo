@@ -1,5 +1,7 @@
-import {Entity, PrimaryKey, Property} from '@mikro-orm/core';
+import {Entity, ManyToOne, PrimaryKey, Property} from '@mikro-orm/core';
 import {ObjectType, Field, Int} from 'type-graphql';
+import {TaskKind} from './TaskKind';
+import {User} from './User';
 
 /**
  * Класс является одновременно и типом для type-graphql
@@ -10,7 +12,7 @@ import {ObjectType, Field, Int} from 'type-graphql';
 
 @ObjectType()
 @Entity()
-export class Post {
+export class Task {
   @Field(() => Int)
   @PrimaryKey()
   id!: number;
@@ -26,4 +28,20 @@ export class Post {
   @Field()
   @Property({type: 'text'})
   title!: string;
+
+  @Field()
+  @Property({type: 'text'})
+  description!: string;
+
+  @Field()
+  @ManyToOne(() => TaskKind)
+  kind!: TaskKind;
+
+  @Field()
+  @ManyToOne(() => User, {onDelete: 'cascade'})
+  user!: User;
+
+  @Field(() => String)
+  @Property({type: 'date'})
+  dateTime!: Date;
 }

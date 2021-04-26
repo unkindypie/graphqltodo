@@ -1,5 +1,12 @@
-import {Entity, PrimaryKey, Property} from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  Collection,
+  OneToMany,
+} from '@mikro-orm/core';
 import {ObjectType, Field, Int} from 'type-graphql';
+import {Task} from './Task';
 
 @Entity()
 @ObjectType()
@@ -22,4 +29,8 @@ export class User {
 
   @Property({type: 'text'})
   password!: string;
+
+  @Field(() => [Task])
+  @OneToMany(() => Task, task => task.user)
+  tasks = new Collection<Task>(this);
 }

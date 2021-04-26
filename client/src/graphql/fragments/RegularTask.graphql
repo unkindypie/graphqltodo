@@ -1,0 +1,16 @@
+fragment RegularTask on Task {
+  id
+  createdAt
+  updatedAt
+  title
+  description
+  dateTime
+  kind {
+    id
+    name
+  }
+  user {
+    username
+    id
+  }
+}

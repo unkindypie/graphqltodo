@@ -22,27 +22,26 @@ export type FieldError = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createPost: Post;
-  updatePost?: Maybe<Post>;
-  deletePost: Scalars['Boolean'];
+  createTask: Task;
+  updateTask?: Maybe<Task>;
+  deleteTask: Scalars['Boolean'];
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
 };
 
 
-export type MutationCreatePostArgs = {
-  title: Scalars['String'];
+export type MutationCreateTaskArgs = {
+  options: TaskCreateInput;
 };
 
 
-export type MutationUpdatePostArgs = {
-  title?: Maybe<Scalars['String']>;
-  id: Scalars['Float'];
+export type MutationUpdateTaskArgs = {
+  options: TaskUpdateInput;
 };
 
 
-export type MutationDeletePostArgs = {
+export type MutationDeleteTaskArgs = {
   id: Scalars['Float'];
 };
 
@@ -56,19 +55,10 @@ export type MutationLoginArgs = {
   options: UsernamePasswordInput;
 };
 
-export type Post = {
-  __typename?: 'Post';
-  id: Scalars['Int'];
-  createdAt: Scalars['String'];
-  updatedAt: Scalars['String'];
-  title: Scalars['String'];
-};
-
 export type Query = {
   __typename?: 'Query';
-  hello: Scalars['String'];
-  posts: Array<Post>;
-  post?: Maybe<Post>;
+  tasks: Array<Task>;
+  post?: Maybe<Task>;
   me: UserResponse;
 };
 
@@ -77,12 +67,49 @@ export type QueryPostArgs = {
   id: Scalars['Float'];
 };
 
+export type Task = {
+  __typename?: 'Task';
+  id: Scalars['Int'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+  title: Scalars['String'];
+  description: Scalars['String'];
+  kind: TaskKind;
+  user: User;
+  dateTime: Scalars['String'];
+};
+
+export type TaskCreateInput = {
+  title: Scalars['String'];
+  description: Scalars['String'];
+  kind: TaskKindInput;
+};
+
+export type TaskKind = {
+  __typename?: 'TaskKind';
+  id: Scalars['Int'];
+  name: Scalars['String'];
+};
+
+export type TaskKindInput = {
+  id: Scalars['Float'];
+  name: Scalars['String'];
+};
+
+export type TaskUpdateInput = {
+  id: Scalars['Float'];
+  title?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  kind?: Maybe<TaskKindInput>;
+};
+
 export type User = {
   __typename?: 'User';
   id: Scalars['Int'];
   updatedAt: Scalars['String'];
   createdAt: Scalars['String'];
   username: Scalars['String'];
+  tasks: Array<Task>;
 };
 
 export type UserResponse = {
@@ -166,14 +193,21 @@ export type MeQuery = (
   ) }
 );
 
-export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
+export type TasksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = (
+export type TasksQuery = (
   { __typename?: 'Query' }
-  & { posts: Array<(
-    { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title'>
+  & { tasks: Array<(
+    { __typename?: 'Task' }
+    & Pick<Task, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'description' | 'dateTime'>
+    & { kind: (
+      { __typename?: 'TaskKind' }
+      & Pick<TaskKind, 'id' | 'name'>
+    ), user: (
+      { __typename?: 'User' }
+      & Pick<User, 'username' | 'id'>
+    ) }
   )> }
 );
 
@@ -243,17 +277,27 @@ export const MeDocument = gql`
 export function useMeQuery(options: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<MeQuery>({ query: MeDocument, ...options });
 };
-export const PostsDocument = gql`
-    query Posts {
-  posts {
+export const TasksDocument = gql`
+    query Tasks {
+  tasks {
     id
     createdAt
     updatedAt
     title
+    description
+    dateTime
+    kind {
+      id
+      name
+    }
+    user {
+      username
+      id
+    }
   }
 }
     `;
 
-export function usePostsQuery(options: Omit<Urql.UseQueryArgs<PostsQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<PostsQuery>({ query: PostsDocument, ...options });
+export function useTasksQuery(options: Omit<Urql.UseQueryArgs<TasksQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<TasksQuery>({ query: TasksDocument, ...options });
 };
