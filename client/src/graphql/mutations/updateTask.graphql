@@ -1,0 +1,5 @@
+mutation UpdateTask($options: TaskUpdateInput!) {
+  updateTask(options: $options) {
+    ...RegularTask
+  }
+}

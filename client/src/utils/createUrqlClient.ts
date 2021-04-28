@@ -7,6 +7,10 @@ import {
   MeDocument,
   RegisterMutation,
   LogoutMutation,
+  DeleteTaskMutation,
+  TasksQuery,
+  TasksDocument,
+  CreateTaskMutation,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { SSRExchange } from "next-urql";
@@ -80,6 +84,42 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
                       __typename: "UserResponse",
                       errors: null,
                     },
+                  };
+                }
+              }
+            );
+          },
+          deleteTask: (_result, args, cache, info) => {
+            betterUpdateQuery<DeleteTaskMutation, TasksQuery>(
+              cache,
+              {
+                query: TasksDocument,
+              },
+              _result as any,
+              (result, query) => {
+                if (!result.deleteTask) {
+                  return query;
+                } else {
+                  return {
+                    tasks: query.tasks.filter((task) => task.id !== args?.id),
+                  };
+                }
+              }
+            );
+          },
+          createTask: (_result, args, cache, info) => {
+            betterUpdateQuery<CreateTaskMutation, TasksQuery>(
+              cache,
+              {
+                query: TasksDocument,
+              },
+              _result as any,
+              (result, query) => {
+                if (!result.createTask) {
+                  return query;
+                } else {
+                  return {
+                    tasks: [result.createTask, ...query.tasks],
                   };
                 }
               }

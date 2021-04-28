@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({}) => {
   const { isAuthenticated, username, logout } = useCurrentUser();
 
   return (
-    <Box w="100vw" p={4} bg={bgColor[colorMode]} color={color[colorMode]}>
+    <Box w="100%" p={4} bg={bgColor[colorMode]} color={color[colorMode]}>
       <Flex width="100%" h="16" justify="space-between" alignItems="center">
         <Flex flexDirection="row" alignItems="center" justifyContent="center">
           <NextLink href="/">

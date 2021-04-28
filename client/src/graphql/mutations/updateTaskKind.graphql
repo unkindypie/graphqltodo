@@ -1,0 +1,6 @@
+mutation UpdateTaskKind($options: TaskKindUpdateInput!) {
+  updateTaskKind(options: $options) {
+    id
+    name
+  }
+}

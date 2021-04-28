@@ -1,4 +1,8 @@
-import { ChakraProvider, ColorModeProvider } from "@chakra-ui/react";
+import {
+  ChakraProvider,
+  ColorModeOptions,
+  ColorModeProvider,
+} from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 
 import { Container } from "../components/Container";
@@ -7,16 +11,17 @@ import { CurrentUserProvider } from "../contexts/CurrentUserContext";
 import theme from "../theme";
 import { createUrqlClient } from "../utils/createUrqlClient";
 
+const colorModeConfig: ColorModeOptions = {
+  useSystemColorMode: false,
+  initialColorMode: "dark",
+};
+
 function MyApp({ Component, pageProps }: any) {
   return (
     <ChakraProvider resetCSS theme={theme}>
-      <ColorModeProvider
-        options={{
-          useSystemColorMode: true,
-        }}
-      >
+      <ColorModeProvider options={colorModeConfig}>
         <CurrentUserProvider>
-          <Container height="100vh">
+          <Container>
             <Header />
 
             <Component {...pageProps} />

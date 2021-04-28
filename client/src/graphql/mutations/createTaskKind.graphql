@@ -1,0 +1,12 @@
+mutation CreateTaskKind($name: String!) {
+  createTaskKind(name: $name) {
+    kind {
+      id
+      name
+    }
+    errors {
+      field
+      message
+    }
+  }
+}

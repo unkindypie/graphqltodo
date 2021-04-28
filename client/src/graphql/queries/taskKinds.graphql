@@ -1,0 +1,6 @@
+query TaskKinds {
+  taskKinds {
+    name
+    id
+  }
+}

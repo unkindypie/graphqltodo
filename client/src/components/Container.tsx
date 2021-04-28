@@ -11,8 +11,12 @@ export const Container = (props: FlexProps) => {
       direction="column"
       alignItems="center"
       justifyContent="flex-start"
+      flex="1"
+      height="100%"
+      minHeight="100vh"
       bg={bgColor[colorMode]}
       color={color[colorMode]}
+      paddingBottom="100px"
       {...props}
     />
   );
