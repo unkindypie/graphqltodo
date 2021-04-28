@@ -5,14 +5,15 @@ import microConfig from './mikro-orm.config';
 import express from 'express';
 import {ApolloServer} from 'apollo-server-express';
 import {buildSchema} from 'type-graphql';
-import {TaskResolver} from './resolvers/task';
-import {UserResolver} from './resolvers/user';
+import {TaskResolver} from './resolvers/TaskResolver';
+import {UserResolver} from './resolvers/UserResolver';
 import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import {__prod__} from './constants';
 import {MyContext} from './types';
 import cors from 'cors';
+import {TaskKindResolver} from './resolvers/TaskKindResolver';
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -49,7 +50,7 @@ const main = async () => {
   // аполо/graphql
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [TaskResolver, UserResolver],
+      resolvers: [TaskResolver, UserResolver, TaskKindResolver],
       validate: false,
     }),
     // объект будет доступен из резалверов graphql

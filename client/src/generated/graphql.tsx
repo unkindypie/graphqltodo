@@ -217,6 +217,16 @@ export type DeleteTaskMutation = (
   & Pick<Mutation, 'deleteTask'>
 );
 
+export type DeleteTaskKindMutationVariables = Exact<{
+  id: Scalars['Float'];
+}>;
+
+
+export type DeleteTaskKindMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'deleteTaskKind'>
+);
+
 export type LoginMutationVariables = Exact<{
   username: Scalars['String'];
   password: Scalars['String'];
@@ -391,6 +401,15 @@ export const DeleteTaskDocument = gql`
 
 export function useDeleteTaskMutation() {
   return Urql.useMutation<DeleteTaskMutation, DeleteTaskMutationVariables>(DeleteTaskDocument);
+};
+export const DeleteTaskKindDocument = gql`
+    mutation DeleteTaskKind($id: Float!) {
+  deleteTaskKind(id: $id)
+}
+    `;
+
+export function useDeleteTaskKindMutation() {
+  return Urql.useMutation<DeleteTaskKindMutation, DeleteTaskKindMutationVariables>(DeleteTaskKindDocument);
 };
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {

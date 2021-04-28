@@ -11,6 +11,11 @@ import {
   TasksQuery,
   TasksDocument,
   CreateTaskMutation,
+  DeleteTaskKindMutation,
+  UpdateTaskKindMutation,
+  TaskKindsQuery,
+  TaskKindsDocument,
+  CreateTaskKindMutation,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { SSRExchange } from "next-urql";
@@ -120,6 +125,66 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
                 } else {
                   return {
                     tasks: [result.createTask, ...query.tasks],
+                  };
+                }
+              }
+            );
+          },
+          deleteTaskKind: (_result, args, cache, info) => {
+            betterUpdateQuery<DeleteTaskKindMutation, TaskKindsQuery>(
+              cache,
+              {
+                query: TaskKindsDocument,
+              },
+              _result as any,
+              (result, query) => {
+                if (!result.deleteTaskKind) {
+                  return query;
+                } else {
+                  return {
+                    taskKinds: query.taskKinds.filter(
+                      (kind) => kind.id !== args?.id
+                    ),
+                  };
+                }
+              }
+            );
+          },
+          updateTaskKind: (_result, args, cache, info) => {
+            betterUpdateQuery<UpdateTaskKindMutation, TaskKindsQuery>(
+              cache,
+              {
+                query: TaskKindsDocument,
+              },
+              _result as any,
+              (result, query) => {
+                if (!result.updateTaskKind) {
+                  return query;
+                } else {
+                  return {
+                    taskKinds: query.taskKinds.map((kind) =>
+                      kind.id === args?.id
+                        ? { ...kind, ...result.updateTaskKind }
+                        : kind
+                    ),
+                  };
+                }
+              }
+            );
+          },
+          createTaskKind: (_result, args, cache, info) => {
+            betterUpdateQuery<CreateTaskKindMutation, TaskKindsQuery>(
+              cache,
+              {
+                query: TaskKindsDocument,
+              },
+              _result as any,
+              (result, query) => {
+                if (!result.createTaskKind.kind) {
+                  return query;
+                } else {
+                  return {
+                    taskKinds: [...query.taskKinds, result.createTaskKind.kind],
                   };
                 }
               }

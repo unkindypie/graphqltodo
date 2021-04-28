@@ -1,3 +1,3 @@
-mutation DeleteTask($id: Float!) {
-  deleteTask(id: $id)
+mutation DeleteTaskKind($id: Float!) {
+  deleteTaskKind(id: $id)
 }

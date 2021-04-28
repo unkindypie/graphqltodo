@@ -97,13 +97,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
           {isOwn && (
             <Box d="flex" flexDirection="row">
               <IconButton
-                aria-label="Edit task"
-                icon={<EditIcon />}
-                variant="ghost"
-                onClick={deleteSelf}
-                size="sm"
-              />
-              <IconButton
                 aria-label="Delete task"
                 icon={<DeleteIcon />}
                 variant="ghost"

@@ -8,7 +8,7 @@ import {
   ObjectType,
   Query,
 } from 'type-graphql';
-import {MyContext} from '../types';
+import {FieldError, MyContext} from '../types';
 import {User} from '../entities/User';
 // хэш алгоритм, который лучше чем bcrypt
 import argon2 from 'argon2';
@@ -21,14 +21,6 @@ class UsernamePasswordInput {
 
   @Field()
   password: string;
-}
-
-@ObjectType()
-class FieldError {
-  @Field()
-  field: string;
-  @Field()
-  message: string;
 }
 
 @ObjectType()

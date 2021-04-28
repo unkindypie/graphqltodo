@@ -19,6 +19,7 @@ import {
   useCreateTaskMutation,
   useTaskKindsQuery,
 } from "../generated/graphql";
+import Link from "next/link";
 
 interface TaskEditorProps {
   isNew?: boolean;
@@ -83,6 +84,11 @@ const TaskEditor: React.FC<TaskEditorProps> = ({}) => {
               )}
             </Box>
 
+            <Link href="/task-kind">
+              <Button size="sm" width="35%" height="8" mt="2" ml="auto">
+                Manage task kinds
+              </Button>
+            </Link>
             <Box mt={4}>
               <InputField
                 name="description"
