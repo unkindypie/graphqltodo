@@ -46,6 +46,15 @@ export class UserResolver {
     return {user};
   }
 
+  @Query(() => [User], {nullable: false})
+  async users(@Ctx() {em, req}: MyContext) {
+    const users = await em.find(User, {
+      id: {$ne: req.session.userId},
+    });
+
+    return users;
+  }
+
   @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,
@@ -131,5 +140,21 @@ export class UserResolver {
         }
       })
     );
+  }
+
+  @Mutation(() => Boolean)
+  async removeAccount(@Arg('id') id: number, @Ctx() {req, em}: MyContext) {
+    const requestedBy = await em.findOne(User, {id: req.session.userId});
+    if (!requestedBy?.isAdmin) {
+      return false;
+    }
+
+    try {
+      await em.nativeDelete(User, {id: id});
+      return true;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 }

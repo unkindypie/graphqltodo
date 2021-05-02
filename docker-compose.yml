@@ -1,0 +1,62 @@
+version: "3.7"
+
+services:
+  redis:
+    image: redis
+    container_name: redis
+    networks:
+      - webnet
+  db:
+    container_name: db
+    image: postgres
+    networks:
+      - webnet
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: todoapp
+      POSTGRES_DB: todoapp
+
+  todoapp_server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: base
+    container_name: todoapp_server
+    ports:
+      - "4000:4000"
+    networks:
+      - webnet
+    environment:
+      # это локальные юрлы сервисов внутри докеровской сети, нужно юзать их
+      # вместо локалхоста
+      DB_HOST: db
+      REDIS_HOST: redis
+      # маунчу src папки проекта как src в докер контейнере чтобы
+      # работал hot reload. При изменение чего-либо в рут директории
+      # надо заново билдить контейнер.
+    volumes:
+      - ./server/src:/home/node/app/src
+    depends_on:
+      - db
+      - redis
+    command: ["npm", "run", "dev"]
+  todoapp_client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: base
+    container_name: todoapp_client
+    ports:
+      - "3000:3000"
+    networks:
+      - webnet
+    environment:
+      API_HOST: todoapp_server
+    volumes:
+      - ./client/src:/home/node/app/src
+    depends_on:
+      - todoapp_server
+    command: ["npm", "run", "dev"]
+
+networks:
+  webnet:

@@ -37,7 +37,7 @@ export class Task {
   @ManyToOne(() => TaskKind)
   kind!: TaskKind;
 
-  @Field()
+  @Field(() => User)
   @ManyToOne(() => User, {onDelete: 'cascade'})
   user!: User;
 

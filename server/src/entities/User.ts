@@ -33,4 +33,8 @@ export class User {
   @Field(() => [Task])
   @OneToMany(() => Task, task => task.user)
   tasks = new Collection<Task>(this);
+
+  @Field()
+  @Property({type: 'boolean', default: 'false'})
+  isAdmin!: boolean;
 }

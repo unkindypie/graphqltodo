@@ -1,0 +1,3 @@
+mutation RemoveAccount($id: Float!) {
+  removeAccount(id: $id)
+}

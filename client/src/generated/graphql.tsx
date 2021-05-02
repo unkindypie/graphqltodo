@@ -31,6 +31,7 @@ export type Mutation = {
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
+  removeAccount: Scalars['Boolean'];
   createTaskKind: TaskKindMutationResponse;
   updateTaskKind?: Maybe<TaskKind>;
   deleteTaskKind: Scalars['Boolean'];
@@ -62,6 +63,11 @@ export type MutationLoginArgs = {
 };
 
 
+export type MutationRemoveAccountArgs = {
+  id: Scalars['Float'];
+};
+
+
 export type MutationCreateTaskKindArgs = {
   name: Scalars['String'];
 };
@@ -81,7 +87,13 @@ export type Query = {
   tasks: Array<Task>;
   task?: Maybe<Task>;
   me: UserResponse;
+  users: Array<User>;
   taskKinds: Array<TaskKind>;
+};
+
+
+export type QueryTasksArgs = {
+  userId?: Maybe<Scalars['Float']>;
 };
 
 
@@ -145,6 +157,7 @@ export type User = {
   createdAt: Scalars['String'];
   username: Scalars['String'];
   tasks: Array<Task>;
+  isAdmin: Scalars['Boolean'];
 };
 
 export type UserResponse = {
@@ -172,7 +185,7 @@ export type RegularTaskFragment = (
 
 export type RegularUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'username'>
+  & Pick<User, 'id' | 'username' | 'isAdmin'>
 );
 
 export type CreateTaskMutationVariables = Exact<{
@@ -275,6 +288,16 @@ export type RegisterMutation = (
   ) }
 );
 
+export type RemoveAccountMutationVariables = Exact<{
+  id: Scalars['Float'];
+}>;
+
+
+export type RemoveAccountMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'removeAccount'>
+);
+
 export type UpdateTaskMutationVariables = Exact<{
   options: TaskUpdateInput;
 }>;
@@ -329,7 +352,9 @@ export type TaskKindsQuery = (
   )> }
 );
 
-export type TasksQueryVariables = Exact<{ [key: string]: never; }>;
+export type TasksQueryVariables = Exact<{
+  userId?: Maybe<Scalars['Float']>;
+}>;
 
 
 export type TasksQuery = (
@@ -337,6 +362,17 @@ export type TasksQuery = (
   & { tasks: Array<(
     { __typename?: 'Task' }
     & RegularTaskFragment
+  )> }
+);
+
+export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UsersQuery = (
+  { __typename?: 'Query' }
+  & { users: Array<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'isAdmin' | 'username'>
   )> }
 );
 
@@ -362,6 +398,7 @@ export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
   id
   username
+  isAdmin
 }
     `;
 export const CreateTaskDocument = gql`
@@ -454,6 +491,15 @@ export const RegisterDocument = gql`
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
+export const RemoveAccountDocument = gql`
+    mutation RemoveAccount($id: Float!) {
+  removeAccount(id: $id)
+}
+    `;
+
+export function useRemoveAccountMutation() {
+  return Urql.useMutation<RemoveAccountMutation, RemoveAccountMutationVariables>(RemoveAccountDocument);
+};
 export const UpdateTaskDocument = gql`
     mutation UpdateTask($options: TaskUpdateInput!) {
   updateTask(options: $options) {
@@ -507,8 +553,8 @@ export function useTaskKindsQuery(options: Omit<Urql.UseQueryArgs<TaskKindsQuery
   return Urql.useQuery<TaskKindsQuery>({ query: TaskKindsDocument, ...options });
 };
 export const TasksDocument = gql`
-    query Tasks {
-  tasks {
+    query Tasks($userId: Float) {
+  tasks(userId: $userId) {
     ...RegularTask
   }
 }
@@ -516,4 +562,17 @@ export const TasksDocument = gql`
 
 export function useTasksQuery(options: Omit<Urql.UseQueryArgs<TasksQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<TasksQuery>({ query: TasksDocument, ...options });
+};
+export const UsersDocument = gql`
+    query Users {
+  users {
+    id
+    isAdmin
+    username
+  }
+}
+    `;
+
+export function useUsersQuery(options: Omit<Urql.UseQueryArgs<UsersQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<UsersQuery>({ query: UsersDocument, ...options });
 };

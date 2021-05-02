@@ -19,12 +19,12 @@
     "clear_port": "fuser -k 4000/tcp && echo 'Terminated' || echo 'Nothing was running on the PORT'",
     "create:migration": "mikro-orm migration:create",
     "lint": "gts lint",
-    "clean": "gts clean",
-    "compile": "tsc",
-    "fix": "gts fix",
-    "prepare": "npm run compile",
-    "pretest": "npm run compile",
-    "posttest": "npm run lint"
+    "_clean": "gts clean",
+    "compile": "tsc -p .",
+    "_fix": "gts fix",
+    "_prepare": "npm run compile",
+    "_pretest": "npm run compile",
+    "_posttest": "npm run lint"
   },
   "author": "",
   "license": "ISC",
@@ -54,7 +54,6 @@
     "express": "^4.17.1",
     "express-session": "*",
     "graphql": "^15.4.0",
-    "pg": "^8.4.2",
     "redis": "*",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^1.1.0"

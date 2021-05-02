@@ -56,10 +56,21 @@ class TaskUpdateInput implements Partial<TaskCreateInput> {
 @Resolver()
 export class TaskResolver {
   @Query(() => [Task])
-  async tasks(@Ctx() {em}: MyContext) {
+  async tasks(
+    @Arg('userId', {nullable: true}) userId: number,
+    @Ctx() {em}: MyContext
+  ) {
     return await em.find(
       Task,
-      {},
+      userId
+        ? {
+            user: {
+              id: {
+                $eq: userId,
+              },
+            },
+          }
+        : {},
       {populate: ['user', 'kind'], orderBy: {['createdAt']: 'DESC'}}
     );
   }

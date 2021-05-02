@@ -16,6 +16,9 @@ import {
   TaskKindsQuery,
   TaskKindsDocument,
   CreateTaskKindMutation,
+  RemoveAccountMutation,
+  UsersQuery,
+  UsersDocument,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { SSRExchange } from "next-urql";
@@ -94,6 +97,24 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
               }
             );
           },
+          removeAccount: (_result, args, cache, info) => {
+            betterUpdateQuery<RemoveAccountMutation, UsersQuery>(
+              cache,
+              {
+                query: UsersDocument,
+              },
+              _result as any,
+              (result, query) => {
+                if (!result.removeAccount) {
+                  return query;
+                } else {
+                  return {
+                    users: query.users?.filter((user) => user.id !== args?.id),
+                  };
+                }
+              }
+            );
+          },
           deleteTask: (_result, args, cache, info) => {
             betterUpdateQuery<DeleteTaskMutation, TasksQuery>(
               cache,
@@ -123,8 +144,11 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
                 if (!result.createTask) {
                   return query;
                 } else {
+                  if (!query) return query;
                   return {
-                    tasks: [result.createTask, ...query.tasks],
+                    tasks: query.tasks
+                      ? [result.createTask, ...query.tasks]
+                      : [],
                   };
                 }
               }
@@ -183,6 +207,8 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
                 if (!result.createTaskKind.kind) {
                   return query;
                 } else {
+                  if (!query) return query;
+
                   return {
                     taskKinds: [...query.taskKinds, result.createTaskKind.kind],
                   };

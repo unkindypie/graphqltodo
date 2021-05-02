@@ -8,6 +8,10 @@ import {User} from './entities/User';
 import {TaskKind} from './entities/TaskKind';
 import {__prod__} from './constants';
 
+console.log(
+  `MikroORM is configured to connect to: ${process.env.DBNAME} with ${process.env.DBUSER}:${process.env.DBPASSWORD}, host: ${process.env.DB_HOST}`
+);
+
 export default {
   entities: [Task, TaskKind, User],
   dbName: process.env.DBNAME,
@@ -15,6 +19,7 @@ export default {
   type: 'postgresql',
   user: process.env.DBUSER,
   password: process.env.DBPASSWORD,
+  host: process.env.DB_HOST ?? 'localhost',
   migrations: {
     tableName: 'mikro_orm_migrations', // name of database table with log of executed transactions
     path: path.join(__dirname, './migrations'), // path to the folder with migrations

@@ -30,7 +30,9 @@ const TaskKindItem: React.FC<TaskKindItemProps> = ({ id, name }) => {
 
   const deleteSelf = React.useCallback(async () => {
     if (deleting) return;
-    await deleteTaskKind({ id });
+    if (!(await deleteTaskKind({ id })).data?.deleteTaskKind) {
+      alert("Can't be deleted! Delete tasks of this kind first.");
+    }
   }, [id, deleteTaskKind]);
 
   return (

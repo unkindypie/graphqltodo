@@ -22,19 +22,25 @@ const main = async () => {
   const app = express();
 
   const RedisStore = connectRedis(session);
-  const redisClient = redis.createClient();
+  const redisClient = redis.createClient({
+    host: process.env.REDIS_HOST ?? 'localhost',
+  });
 
+  // console.log(`Connecting to redis: ${process.env.REDIS_HOST}`);
   // глобально настариваю корс
   app.use(cors({origin: 'http://localhost:3000', credentials: true}));
+
+  const redisStore = new RedisStore({
+    client: redisClient,
+    disableTouch: true,
+    host: process.env.REDIS_HOST ?? 'localhost',
+  });
 
   // редис/куки
   app.use(
     session({
       name: process.env.AUTH_COOKIE_NAME,
-      store: new RedisStore({
-        client: redisClient,
-        disableTouch: true,
-      }),
+      store: redisStore,
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years ^_^
         httpOnly: true, // нет доступа к куки из js
@@ -54,7 +60,11 @@ const main = async () => {
       validate: false,
     }),
     // объект будет доступен из резалверов graphql
-    context: ({req, res}): MyContext => ({em: orm.em, req: req as any, res}),
+    context: ({req, res}): MyContext => ({
+      em: orm.em,
+      req: req as any,
+      res,
+    }),
   });
 
   apolloServer.applyMiddleware({app, cors: false});
