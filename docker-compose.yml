@@ -12,9 +12,9 @@ services:
     networks:
       - webnet
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: todoapp
-      POSTGRES_DB: todoapp
+      POSTGRES_USER: ${DBUSER}
+      POSTGRES_PASSWORD: ${DBPASSWORD}
+      POSTGRES_DB: ${DBNAME}
 
   todoapp_server:
     build:
@@ -23,7 +23,7 @@ services:
       target: base
     container_name: todoapp_server
     ports:
-      - "4000:4000"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     networks:
       - webnet
     environment:
@@ -39,6 +39,8 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - .env
     command: ["npm", "run", "dev"]
   todoapp_client:
     build:
@@ -52,10 +54,13 @@ services:
       - webnet
     environment:
       API_HOST: todoapp_server
+      NEXT_PUBLIC_API_PORT: ${SERVER_PORT}
     volumes:
       - ./client/src:/home/node/app/src
     depends_on:
       - todoapp_server
+    env_file:
+      - .env
     command: ["npm", "run", "dev"]
 
 networks:

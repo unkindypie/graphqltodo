@@ -24,7 +24,9 @@ import { betterUpdateQuery } from "./betterUpdateQuery";
 import { SSRExchange } from "next-urql";
 
 export const createUrqlClient = (ssrExchange: SSRExchange) => ({
-  url: "http://localhost:4000/graphql",
+  url: `http://${process.env.API_HOST ?? "localhost"}:${
+    process.env.NEXT_PUBLIC_API_PORT
+  }/graphql`,
   fetchOptions: { credentials: "include" as const },
   exchanges: [
     dedupExchange,
