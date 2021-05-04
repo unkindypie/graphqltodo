@@ -93,7 +93,7 @@ export type Query = {
 
 
 export type QueryTasksArgs = {
-  userId?: Maybe<Scalars['Float']>;
+  options: TasksQueryInput;
 };
 
 
@@ -111,6 +111,7 @@ export type Task = {
   kind: TaskKind;
   user: User;
   dateTime: Scalars['String'];
+  completed: Scalars['Boolean'];
 };
 
 export type TaskCreateInput = {
@@ -148,6 +149,13 @@ export type TaskUpdateInput = {
   description?: Maybe<Scalars['String']>;
   kind?: Maybe<TaskKindInput>;
   dateTime?: Maybe<Scalars['DateTime']>;
+  completed?: Maybe<Scalars['Boolean']>;
+};
+
+export type TasksQueryInput = {
+  userId?: Maybe<Scalars['Float']>;
+  from?: Maybe<Scalars['DateTime']>;
+  onlyCompleted?: Maybe<Scalars['Boolean']>;
 };
 
 export type User = {
@@ -173,7 +181,7 @@ export type UsernamePasswordInput = {
 
 export type RegularTaskFragment = (
   { __typename?: 'Task' }
-  & Pick<Task, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'description' | 'dateTime'>
+  & Pick<Task, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'description' | 'dateTime' | 'completed'>
   & { kind: (
     { __typename?: 'TaskKind' }
     & Pick<TaskKind, 'id' | 'name'>
@@ -353,7 +361,7 @@ export type TaskKindsQuery = (
 );
 
 export type TasksQueryVariables = Exact<{
-  userId?: Maybe<Scalars['Float']>;
+  options: TasksQueryInput;
 }>;
 
 
@@ -384,6 +392,7 @@ export const RegularTaskFragmentDoc = gql`
   title
   description
   dateTime
+  completed
   kind {
     id
     name
@@ -553,8 +562,8 @@ export function useTaskKindsQuery(options: Omit<Urql.UseQueryArgs<TaskKindsQuery
   return Urql.useQuery<TaskKindsQuery>({ query: TaskKindsDocument, ...options });
 };
 export const TasksDocument = gql`
-    query Tasks($userId: Float) {
-  tasks(userId: $userId) {
+    query Tasks($options: TasksQueryInput!) {
+  tasks(options: $options) {
     ...RegularTask
   }
 }

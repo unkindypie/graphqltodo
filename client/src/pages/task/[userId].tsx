@@ -16,25 +16,7 @@ const TasksPage = () => {
   const router = useRouter();
   const { userId } = router.query;
 
-  const [{ data, fetching }] = useTasksQuery({
-    variables: { userId: Number(userId) },
-  });
-  const { isAuthenticated, id } = useCurrentUser();
-
-  return (
-    <Wrapper minH="100%">
-      {isAuthenticated && userId == id && (
-        <Box d="flex" flexDir="row" justifyContent="flex-end" mb="5">
-          <Link href="/task/new">
-            <Button>
-              <AddIcon width="3" mr="1" /> New
-            </Button>
-          </Link>
-        </Box>
-      )}
-      {fetching ? <Spinner /> : <TaskList items={data!.tasks} />}{" "}
-    </Wrapper>
-  );
+  return <TaskList userId={Number(userId)} />;
 };
 
 export default withUrqlClient(createUrqlClient, { ssr: true })(TasksPage);

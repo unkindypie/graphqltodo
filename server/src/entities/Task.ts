@@ -6,7 +6,7 @@ import {User} from './User';
 /**
  * Класс является одновременно и типом для type-graphql
  * (ObjectType)
- *  и mikro-моделью в бд
+ *  и mikro-orm-моделью в бд
  *  (Entity)
  */
 
@@ -44,4 +44,8 @@ export class Task {
   @Field(() => String)
   @Property({type: 'date'})
   dateTime!: Date;
+
+  @Field()
+  @Property({type: 'boolean', default: false})
+  completed!: boolean;
 }

@@ -2,11 +2,11 @@ import { DeleteIcon, EditIcon, StarIcon } from "@chakra-ui/icons";
 import { Box } from "@chakra-ui/layout";
 import {
   Badge,
+  Checkbox,
   Editable,
   EditableInput,
   EditablePreview,
   IconButton,
-  Select,
 } from "@chakra-ui/react";
 import React from "react";
 import {
@@ -27,6 +27,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   description,
   user,
   id,
+  completed,
 }) => {
   const { id: currentUserId } = useCurrentUser();
   const [_, deleteTask] = useDeleteTaskMutation();
@@ -61,6 +62,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
     },
     [updateSelf]
   );
+
+  const toggleCompleted = React.useCallback(() => {
+    updateSelf({ completed: !completed });
+  }, [updateSelf, completed]);
 
   return (
     <Box maxW="md" borderWidth="1px" borderRadius="lg" overflow="hidden">
@@ -144,13 +149,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </Box>
         <Box d="flex" flexDir="column" justifyContent="flex-end" flex="1">
           <Box
+            mt={2}
             d="flex"
             flexDir="row"
-            justifyContent="flex-end"
+            justifyContent="space-between"
             w="100%"
             color="gray.600"
             fontSize="sm"
           >
+            <Checkbox
+              isDisabled={!isOwn}
+              onChange={toggleCompleted}
+              isChecked={completed}
+            >
+              Done
+            </Checkbox>
+
             <Editable
               defaultValue={defaultDateTime}
               isPreviewFocusable={isOwn}

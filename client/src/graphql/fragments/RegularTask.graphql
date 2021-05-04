@@ -5,6 +5,7 @@ fragment RegularTask on Task {
   title
   description
   dateTime
+  completed
   kind {
     id
     name

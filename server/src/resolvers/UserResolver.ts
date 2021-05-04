@@ -1,36 +1,10 @@
-import {
-  Resolver,
-  Mutation,
-  InputType,
-  Field,
-  Arg,
-  Ctx,
-  ObjectType,
-  Query,
-} from 'type-graphql';
-import {FieldError, MyContext} from '../types';
+import {Resolver, Mutation, Arg, Ctx, Query} from 'type-graphql';
+import {MyContext} from '../types';
 import {User} from '../entities/User';
 // хэш алгоритм, который лучше чем bcrypt
 import argon2 from 'argon2';
-
-// декоратор для создания объекта-аргумента
-@InputType()
-class UsernamePasswordInput {
-  @Field()
-  username: string;
-
-  @Field()
-  password: string;
-}
-
-@ObjectType()
-class UserResponse {
-  @Field(() => [FieldError], {nullable: true})
-  errors?: FieldError[];
-
-  @Field(() => User, {nullable: true})
-  user?: User;
-}
+import {UsernamePasswordInput} from '../inputs/UsernamePasswordInput';
+import {UserResponse} from '../responses/UserResponse';
 
 @Resolver()
 export class UserResolver {

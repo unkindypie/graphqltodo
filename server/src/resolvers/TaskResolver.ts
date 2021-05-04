@@ -1,78 +1,52 @@
-import {TaskKindType} from '../entities/TaskKind';
 import {User} from '../entities/User';
 import {MyContext} from '../types';
-import {
-  Arg,
-  Ctx,
-  Field,
-  InputType,
-  Mutation,
-  Query,
-  Resolver,
-} from 'type-graphql';
+import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
 import {Task} from '../entities/Task';
-
-@InputType()
-class TaskKindInput {
-  @Field()
-  id: number;
-  @Field()
-  name: TaskKindType;
-}
-
-@InputType()
-class TaskCreateInput {
-  @Field()
-  title: string;
-
-  @Field()
-  description: string;
-
-  @Field()
-  kind: TaskKindInput;
-
-  @Field()
-  dateTime: Date;
-}
-
-@InputType()
-class TaskUpdateInput implements Partial<TaskCreateInput> {
-  @Field()
-  id: number;
-
-  @Field({nullable: true})
-  title?: string;
-
-  @Field({nullable: true})
-  description?: string;
-
-  @Field({nullable: true})
-  kind?: TaskKindInput;
-
-  @Field({nullable: true})
-  dateTime?: Date;
-}
+import {TaskCreateInput} from '../inputs/TaskCreateInput';
+import {TaskUpdateInput} from '../inputs/TaskUpdateInput';
+import {TasksQueryInput} from '../inputs/TasksQueryInput';
 
 @Resolver()
 export class TaskResolver {
   @Query(() => [Task])
   async tasks(
-    @Arg('userId', {nullable: true}) userId: number,
+    @Arg('options') options: TasksQueryInput,
     @Ctx() {em}: MyContext
   ) {
-    return await em.find(
-      Task,
-      userId
-        ? {
-            user: {
-              id: {
-                $eq: userId,
-              },
-            },
-          }
-        : {},
-      {populate: ['user', 'kind'], orderBy: {['createdAt']: 'DESC'}}
-    );
+    const {userId, onlyCompleted, from} = options;
+
+    let filters = {};
+
+    if (userId) {
+      filters = {
+        user: {
+          id: {
+            $eq: userId,
+          },
+        },
+      };
+    }
+
+    if (onlyCompleted !== undefined) {
+      filters = {
+        ...filters,
+        completed: onlyCompleted,
+      };
+    }
+
+    if (from) {
+      filters = {
+        ...filters,
+        dateTime: {
+          $gt: new Date(from),
+        },
+      };
+    }
+
+    return await em.find(Task, filters, {
+      populate: ['user', 'kind'],
+      orderBy: {['createdAt']: 'DESC'},
+    });
   }
 
   @Query(() => Task, {nullable: true})
@@ -108,16 +82,16 @@ export class TaskResolver {
       return null;
     }
 
-    let changed = false;
+    let isChanged = false;
     let key: keyof TaskUpdateInput;
     for (key in options) {
       if (options[key] !== undefined && key !== 'id') {
-        task[key] = options[key] as any;
+        (task[key] as any) = options[key] as any;
 
-        changed = true;
+        isChanged = true;
       }
     }
-    if (changed) {
+    if (isChanged) {
       await em.persistAndFlush(task);
     }
 

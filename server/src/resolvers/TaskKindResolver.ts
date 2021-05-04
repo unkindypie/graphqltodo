@@ -1,32 +1,8 @@
 import {TaskKind} from '../entities/TaskKind';
-import {FieldError, MyContext} from '../types';
-import {
-  Arg,
-  Ctx,
-  Field,
-  InputType,
-  Mutation,
-  ObjectType,
-  Query,
-  Resolver,
-} from 'type-graphql';
-
-@ObjectType()
-class TaskKindMutationResponse {
-  @Field(() => [FieldError], {nullable: true})
-  errors?: FieldError[];
-
-  @Field(() => TaskKind, {nullable: true})
-  kind?: TaskKind;
-}
-
-@InputType()
-class TaskKindUpdateInput {
-  @Field()
-  name: string;
-  @Field()
-  id: number;
-}
+import {MyContext} from '../types';
+import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
+import {TaskKindUpdateInput} from '../inputs/TaskKindUpdateInput';
+import {TaskKindMutationResponse} from '../responses/TaskKindMutationResponse';
 
 @Resolver()
 export class TaskKindResolver {
