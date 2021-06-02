@@ -24,7 +24,7 @@ export class TaskKindResolver {
     }
     const kind = await em.create(TaskKind, {name});
 
-    await em.persistAndFlush(kind);
+    await em.save(kind);
 
     return {
       kind,
@@ -43,7 +43,7 @@ export class TaskKindResolver {
 
     taskKind.name = options.name;
 
-    await em.persistAndFlush(taskKind);
+    await em.save(taskKind);
 
     return taskKind;
   }
@@ -51,7 +51,7 @@ export class TaskKindResolver {
   @Mutation(() => Boolean)
   async deleteTaskKind(@Arg('id') id: number, @Ctx() {em}: MyContext) {
     try {
-      await em.nativeDelete(TaskKind, {id});
+      await em.delete(TaskKind, {id});
     } catch (err) {
       console.log(err);
       return false;

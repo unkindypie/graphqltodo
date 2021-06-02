@@ -1,40 +1,49 @@
 import {
   Entity,
-  PrimaryKey,
-  Property,
-  Collection,
+  Column,
+  PrimaryGeneratedColumn,
   OneToMany,
-} from '@mikro-orm/core';
+  AfterUpdate,
+} from 'typeorm';
 import {ObjectType, Field, Int} from 'type-graphql';
+
 import {Task} from './Task';
 
 @Entity()
 @ObjectType()
 export class User {
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   @Field(() => Int)
   id!: number;
 
   @Field(() => String)
-  @Property({type: 'date', onUpdate: () => new Date()})
+  @Column({
+    type: 'timestamptz',
+    // onUpdate: () => new Date(),
+  })
   updatedAt = new Date();
 
   @Field(() => String)
-  @Property({type: 'date'})
+  @Column({type: 'timestamptz'})
   createdAt = new Date();
 
   @Field(() => String)
-  @Property({type: 'text', unique: true})
+  @Column({type: 'text', unique: true})
   username!: string;
 
-  @Property({type: 'text'})
+  @Column({type: 'text'})
   password!: string;
 
   @Field(() => [Task])
   @OneToMany(() => Task, task => task.user)
-  tasks = new Collection<Task>(this);
+  tasks: Task[];
 
   @Field()
-  @Property({type: 'boolean', default: 'false'})
+  @Column({type: 'boolean', default: 'false'})
   isAdmin!: boolean;
+
+  @AfterUpdate()
+  updateUpdatedAt() {
+    this.updatedAt = new Date();
+  }
 }

@@ -1,10 +1,12 @@
 import {Resolver, Mutation, Arg, Ctx, Query} from 'type-graphql';
-import {MyContext} from '../types';
-import {User} from '../entities/User';
 // хэш алгоритм, который лучше чем bcrypt
 import argon2 from 'argon2';
+import {Not} from 'typeorm';
+
 import {UsernamePasswordInput} from '../inputs/UsernamePasswordInput';
 import {UserResponse} from '../responses/UserResponse';
+import {MyContext} from '../types';
+import {User} from '../entities/User';
 
 @Resolver()
 export class UserResolver {
@@ -23,7 +25,9 @@ export class UserResolver {
   @Query(() => [User], {nullable: false})
   async users(@Ctx() {em, req}: MyContext) {
     const users = await em.find(User, {
-      id: {$ne: req.session.userId},
+      where: {
+        id: Not(req.session.userId),
+      },
     });
 
     return users;
@@ -51,7 +55,7 @@ export class UserResolver {
       username: options.username,
       password: hashedPassword,
     });
-    await em.persistAndFlush(user);
+    await em.save(user);
 
     req.session.userId = user.id;
 
@@ -96,7 +100,7 @@ export class UserResolver {
 
     req.session.userId = user.id;
 
-    await em.persistAndFlush(user);
+    await em.save(user);
     return {user};
   }
 
@@ -124,7 +128,7 @@ export class UserResolver {
     }
 
     try {
-      await em.nativeDelete(User, {id: id});
+      await em.delete(User, {id: id});
       return true;
     } catch (err) {
       console.log(err);

@@ -1,4 +1,4 @@
-import {Entity, PrimaryKey, Property, Unique} from '@mikro-orm/core';
+import {Entity, Column, PrimaryGeneratedColumn} from 'typeorm';
 import {Field, Int, ObjectType} from 'type-graphql';
 
 // export type TaskKindType = 'appointment' | 'event' | 'reminder';
@@ -8,11 +8,10 @@ export type TaskKindType = string;
 @ObjectType()
 export class TaskKind {
   @Field(() => Int)
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
   @Field()
-  @Unique()
-  @Property({type: 'text'})
+  @Column({type: 'text', unique: true})
   name!: TaskKindType;
 }

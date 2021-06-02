@@ -1,6 +1,8 @@
+import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
+import {MoreThan, FindManyOptions} from 'typeorm';
+
 import {User} from '../entities/User';
 import {MyContext} from '../types';
-import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
 import {Task} from '../entities/Task';
 import {TaskCreateInput} from '../inputs/TaskCreateInput';
 import {TaskUpdateInput} from '../inputs/TaskUpdateInput';
@@ -15,43 +17,40 @@ export class TaskResolver {
   ) {
     const {userId, onlyCompleted, from} = options;
 
-    let filters = {};
+    let where: FindManyOptions<Task>['where'] = {};
 
     if (userId) {
-      filters = {
+      where = {
         user: {
-          id: {
-            $eq: userId,
-          },
+          id: userId,
         },
       };
     }
 
     if (onlyCompleted !== undefined) {
-      filters = {
-        ...filters,
+      where = {
+        ...where,
         completed: onlyCompleted,
       };
     }
 
     if (from) {
-      filters = {
-        ...filters,
-        dateTime: {
-          $gt: new Date(from),
-        },
+      where = {
+        ...where,
+        dateTime: MoreThan(new Date(from)),
       };
     }
 
-    return await em.find(Task, filters, {
-      populate: ['user', 'kind'],
-      orderBy: {['createdAt']: 'DESC'},
+    return await em.find(Task, {
+      where,
+      order: {createdAt: 'DESC'},
+      relations: ['user', 'kind'],
     });
   }
 
   @Query(() => Task, {nullable: true})
   task(@Arg('id') id: number, @Ctx() {em}: MyContext) {
-    return em.findOne(Task, {id}, {populate: ['user', 'kind']});
+    return em.findOne(Task, {id}, {relations: ['user', 'kind']});
   }
 
   @Mutation(() => Task)
@@ -64,7 +63,7 @@ export class TaskResolver {
 
     const task = em.create(Task, {...options, user});
 
-    await em.persistAndFlush(task);
+    await em.save(task);
 
     return task;
   }
@@ -92,7 +91,7 @@ export class TaskResolver {
       }
     }
     if (isChanged) {
-      await em.persistAndFlush(task);
+      await em.save(task);
     }
 
     return task;
@@ -101,7 +100,7 @@ export class TaskResolver {
   @Mutation(() => Boolean)
   async deleteTask(@Arg('id') id: number, @Ctx() {em, req}: MyContext) {
     try {
-      await em.nativeDelete(Task, {id, user: {id: req.session.userId}});
+      await em.delete(Task, {id, user: {id: req.session.userId}});
     } catch (err) {
       console.error(err);
       return false;

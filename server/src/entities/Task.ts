@@ -1,36 +1,38 @@
-import {Entity, ManyToOne, PrimaryKey, Property} from '@mikro-orm/core';
+import {
+  Entity,
+  ManyToOne,
+  Column,
+  PrimaryGeneratedColumn,
+  AfterUpdate,
+} from 'typeorm';
 import {ObjectType, Field, Int} from 'type-graphql';
+
 import {TaskKind} from './TaskKind';
 import {User} from './User';
-
-/**
- * Класс является одновременно и типом для type-graphql
- * (ObjectType)
- *  и mikro-orm-моделью в бд
- *  (Entity)
- */
 
 @ObjectType()
 @Entity()
 export class Task {
   @Field(() => Int)
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
   @Field(() => String)
-  @Property({type: 'date'})
+  @Column({type: 'timestamptz'})
   createdAt = new Date();
 
   @Field(() => String)
-  @Property({type: 'date', onUpdate: () => new Date()})
+  @Column({
+    type: 'timestamptz',
+  })
   updatedAt = new Date();
 
   @Field()
-  @Property({type: 'text'})
+  @Column({type: 'text'})
   title!: string;
 
   @Field()
-  @Property({type: 'text'})
+  @Column({type: 'text'})
   description!: string;
 
   @Field()
@@ -38,14 +40,19 @@ export class Task {
   kind!: TaskKind;
 
   @Field(() => User)
-  @ManyToOne(() => User, {onDelete: 'cascade'})
+  @ManyToOne(() => User, user => user.tasks, {onDelete: 'CASCADE'})
   user!: User;
 
   @Field(() => String)
-  @Property({type: 'date'})
+  @Column({type: 'timestamptz'})
   dateTime!: Date;
 
   @Field()
-  @Property({type: 'boolean', default: false})
+  @Column({type: 'boolean', default: false})
   completed!: boolean;
+
+  @AfterUpdate()
+  updateUpdatedAt() {
+    this.updatedAt = new Date();
+  }
 }

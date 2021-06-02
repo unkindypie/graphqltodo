@@ -1,23 +1,22 @@
-require('dotenv').config();
-import 'reflect-metadata'; // описывает ошибки type-graphql
-import {MikroORM} from '@mikro-orm/core'; // бд модели
-import microConfig from './mikro-orm.config';
-import express from 'express';
-import {ApolloServer} from 'apollo-server-express';
-import {buildSchema} from 'type-graphql';
-import {TaskResolver} from './resolvers/TaskResolver';
-import {UserResolver} from './resolvers/UserResolver';
+import 'reflect-metadata';
+import {createConnection} from 'typeorm';
 import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
+import express from 'express';
+import {ApolloServer} from 'apollo-server-express';
+import {buildSchema} from 'type-graphql';
+import cors from 'cors';
+
+import typeormConfig from './ormconfig';
+import {TaskResolver} from './resolvers/TaskResolver';
+import {UserResolver} from './resolvers/UserResolver';
 import {__prod__} from './constants';
 import {MyContext} from './types';
-import cors from 'cors';
 import {TaskKindResolver} from './resolvers/TaskKindResolver';
 
 const main = async () => {
-  const orm = await MikroORM.init(microConfig);
-  await orm.getMigrator().up();
+  const dbConnection = await createConnection(typeormConfig);
 
   const app = express();
 
@@ -61,7 +60,7 @@ const main = async () => {
     }),
     // объект будет доступен из резалверов graphql
     context: ({req, res}): MyContext => ({
-      em: orm.em,
+      em: dbConnection.manager,
       req: req as any,
       res,
     }),

@@ -1,10 +1,10 @@
-import {EntityManager, IDatabaseDriver, Connection} from '@mikro-orm/core';
 import {Request, Response} from 'express';
 import {Session} from 'express-session';
 import {ObjectType, Field} from 'type-graphql';
+import {EntityManager} from 'typeorm';
 
 export type MyContext = {
-  em: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>;
+  em: EntityManager;
   req: Request & {session: Session & {userId: number}};
   res: Response;
 };

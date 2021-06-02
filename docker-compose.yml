@@ -15,7 +15,8 @@ services:
       POSTGRES_USER: ${DBUSER}
       POSTGRES_PASSWORD: ${DBPASSWORD}
       POSTGRES_DB: ${DBNAME}
-
+    ports:
+      - "5432:5432"
   todoapp_server:
     build:
       context: ./server
