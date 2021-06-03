@@ -1,4 +1,4 @@
-import {TaskKindType} from '../entities/TaskKind';
+import {TaskKindType} from '../../../entities/TaskKind';
 import {Field, InputType} from 'type-graphql';
 
 // import {Validate} from 'class-validator';

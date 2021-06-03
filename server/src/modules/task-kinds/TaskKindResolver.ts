@@ -1,10 +1,10 @@
 import {Arg, Mutation, Query, Resolver} from 'type-graphql';
 import {InjectRepository} from 'typeorm-typedi-extensions';
 
-import {TaskKind} from '../entities/TaskKind';
-import {TaskKindUpdateInput} from '../inputs/TaskKindUpdateInput';
-import {TaskKindMutationResponse} from '../responses/TaskKindMutationResponse';
-import {TaskKindRepository} from '../repositories/TaskKindRepository';
+import {TaskKind} from '../../entities/TaskKind';
+import {TaskKindUpdateInput} from './inputs/TaskKindUpdateInput';
+import {TaskKindMutationResponse} from './responses/TaskKindMutationResponse';
+import {TaskKindRepository} from './repositories/TaskKindRepository';
 import {Service} from 'typedi';
 
 @Service()

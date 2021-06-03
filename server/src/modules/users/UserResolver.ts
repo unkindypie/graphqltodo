@@ -4,11 +4,11 @@ import argon2 from 'argon2';
 import {Not} from 'typeorm';
 import {InjectRepository} from 'typeorm-typedi-extensions';
 
-import {UsernamePasswordInput} from '../inputs/UsernamePasswordInput';
-import {UserResponse} from '../responses/UserResponse';
-import {RequestContext} from '../types';
-import {User} from '../entities/User';
-import {UserRepository} from '../repositories/UserRepository';
+import {UsernamePasswordInput} from './inputs/UsernamePasswordInput';
+import {UserResponse} from './responses/UserResponse';
+import {RequestContext} from '../core/types/RequestContext';
+import {User} from '../../entities/User';
+import {UserRepository} from './repositories/UserRepository';
 import {Service} from 'typedi';
 
 @Service()

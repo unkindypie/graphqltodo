@@ -1,5 +1,5 @@
-import {TaskKind} from '../entities/TaskKind';
-import {FieldError} from '../types';
+import {TaskKind} from '../../../entities/TaskKind';
+import {FieldError} from '../../core/responses/FieldError';
 import {Field, ObjectType} from 'type-graphql';
 
 @ObjectType()

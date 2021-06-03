@@ -11,11 +11,11 @@ import {Container} from 'typeorm-typedi-extensions';
 // import {Container} from 'typedi'
 
 import typeormConfig from './ormconfig';
-import {TaskResolver} from './resolvers/TaskResolver';
-import {UserResolver} from './resolvers/UserResolver';
 import {__prod__} from './constants';
-import {RequestContext} from './types';
-import {TaskKindResolver} from './resolvers/TaskKindResolver';
+import {RequestContext} from './modules/core/types/RequestContext';
+import {TaskResolver} from './modules/tasks/TaskResolver';
+import {UserResolver} from './modules/users/UserResolver';
+import {TaskKindResolver} from './modules/task-kinds/TaskKindResolver';
 
 class Application {
   async startup() {

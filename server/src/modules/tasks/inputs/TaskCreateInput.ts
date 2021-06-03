@@ -1,5 +1,5 @@
 import {Field, InputType} from 'type-graphql';
-import {TaskKindInput} from './TaskKindInput';
+import {TaskKindInput} from '../../task-kinds/inputs/TaskKindInput';
 
 @InputType()
 export class TaskCreateInput {

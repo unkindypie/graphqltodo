@@ -2,12 +2,12 @@ import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
 import {MoreThan, FindManyOptions} from 'typeorm';
 import {InjectRepository} from 'typeorm-typedi-extensions';
 
-import {RequestContext} from '../types';
-import {Task} from '../entities/Task';
-import {TaskCreateInput} from '../inputs/TaskCreateInput';
-import {TaskUpdateInput} from '../inputs/TaskUpdateInput';
-import {TasksQueryInput} from '../inputs/TasksQueryInput';
-import {TaskRepository} from '../repositories/TaskRepository';
+import {RequestContext} from '../core/types/RequestContext';
+import {Task} from '../../entities/Task';
+import {TaskCreateInput} from './inputs/TaskCreateInput';
+import {TaskUpdateInput} from './inputs/TaskUpdateInput';
+import {TasksQueryInput} from './inputs/TasksQueryInput';
+import {TaskRepository} from './repositories/TaskRepository';
 import {Service} from 'typedi';
 
 @Service()
