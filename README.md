@@ -1,5 +1,8 @@
 # TODOAPP
 
+Dummy pet project where I mess around with hypebeast tech stack (like GraphQL,
+NextJS, typeorm, redis, postgre, typedi, docker).
+
 ## Installation
 
 1. Create .env in the project root(see Config example)

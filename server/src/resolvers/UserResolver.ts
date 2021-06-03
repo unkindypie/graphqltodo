@@ -2,29 +2,37 @@ import {Resolver, Mutation, Arg, Ctx, Query} from 'type-graphql';
 // хэш алгоритм, который лучше чем bcrypt
 import argon2 from 'argon2';
 import {Not} from 'typeorm';
+import {InjectRepository} from 'typeorm-typedi-extensions';
 
 import {UsernamePasswordInput} from '../inputs/UsernamePasswordInput';
 import {UserResponse} from '../responses/UserResponse';
-import {MyContext} from '../types';
+import {RequestContext} from '../types';
 import {User} from '../entities/User';
+import {UserRepository} from '../repositories/UserRepository';
+import {Service} from 'typedi';
 
+@Service()
 @Resolver()
 export class UserResolver {
+  constructor(
+    @InjectRepository(UserRepository) private readonly userRepo: UserRepository
+  ) {}
+
   @Query(() => UserResponse, {nullable: false})
-  async me(@Ctx() {req, em}: MyContext) {
+  async me(@Ctx() {req}: RequestContext) {
     if (!req.session.userId) {
       return {
         errors: [{message: 'User is not authenticated', field: 'userId'}],
       };
     }
-    const user = await em.findOne(User, {id: req.session.userId});
+    const user = await this.userRepo.findOne({id: req.session.userId});
 
     return {user};
   }
 
   @Query(() => [User], {nullable: false})
-  async users(@Ctx() {em, req}: MyContext) {
-    const users = await em.find(User, {
+  async users(@Ctx() {req}: RequestContext) {
+    const users = await this.userRepo.find({
       where: {
         id: Not(req.session.userId),
       },
@@ -36,9 +44,11 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,
-    @Ctx() {em, req}: MyContext
+    @Ctx() {req}: RequestContext
   ) {
-    const existingUser = await em.findOne(User, {username: options.username});
+    const existingUser = await this.userRepo.findOne({
+      username: options.username,
+    });
     if (existingUser) {
       return {
         errors: [
@@ -51,11 +61,11 @@ export class UserResolver {
     }
 
     const hashedPassword = await argon2.hash(options.password);
-    const user = await em.create(User, {
+    const user = await this.userRepo.create({
       username: options.username,
       password: hashedPassword,
     });
-    await em.save(user);
+    await this.userRepo.save(user);
 
     req.session.userId = user.id;
 
@@ -65,9 +75,9 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg('options') options: UsernamePasswordInput,
-    @Ctx() {em, req}: MyContext
+    @Ctx() {req}: RequestContext
   ) {
-    const user = await em.findOne(User, {username: options.username});
+    const user = await this.userRepo.findOne({username: options.username});
     if (!user) {
       return {
         errors: [
@@ -100,12 +110,12 @@ export class UserResolver {
 
     req.session.userId = user.id;
 
-    await em.save(user);
+    await this.userRepo.save(user);
     return {user};
   }
 
   @Mutation(() => Boolean)
-  async logout(@Ctx() {req, res}: MyContext) {
+  async logout(@Ctx() {req, res}: RequestContext) {
     return new Promise(resolve =>
       req.session.destroy(err => {
         res.clearCookie(process.env.AUTH_COOKIE_NAME as string);
@@ -121,14 +131,14 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async removeAccount(@Arg('id') id: number, @Ctx() {req, em}: MyContext) {
-    const requestedBy = await em.findOne(User, {id: req.session.userId});
+  async removeAccount(@Arg('id') id: number, @Ctx() {req}: RequestContext) {
+    const requestedBy = await this.userRepo.findOne({id: req.session.userId});
     if (!requestedBy?.isAdmin) {
       return false;
     }
 
     try {
-      await em.delete(User, {id: id});
+      await this.userRepo.delete({id: id});
       return true;
     } catch (err) {
       console.log(err);

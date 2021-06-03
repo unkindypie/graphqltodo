@@ -1,30 +1,38 @@
+import {Arg, Mutation, Query, Resolver} from 'type-graphql';
+import {InjectRepository} from 'typeorm-typedi-extensions';
+
 import {TaskKind} from '../entities/TaskKind';
-import {MyContext} from '../types';
-import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
 import {TaskKindUpdateInput} from '../inputs/TaskKindUpdateInput';
 import {TaskKindMutationResponse} from '../responses/TaskKindMutationResponse';
+import {TaskKindRepository} from '../repositories/TaskKindRepository';
+import {Service} from 'typedi';
 
+@Service()
 @Resolver()
 export class TaskKindResolver {
+  constructor(
+    @InjectRepository(TaskKindRepository)
+    private readonly taskKindRepo: TaskKindRepository
+  ) {}
+
   @Query(() => [TaskKind])
-  async taskKinds(@Ctx() {em}: MyContext) {
-    return await em.find(TaskKind, {});
+  async taskKinds() {
+    return await this.taskKindRepo.find({});
   }
 
   @Mutation(() => TaskKindMutationResponse)
   async createTaskKind(
-    @Arg('name') name: string,
-    @Ctx() {em}: MyContext
+    @Arg('name') name: string
   ): Promise<TaskKindMutationResponse> {
-    const existingTaskKind = await em.findOne(TaskKind, {name});
+    const existingTaskKind = await this.taskKindRepo.findOne({name});
     if (existingTaskKind) {
       return {
         errors: [{field: 'name', message: 'Task kind already exists'}],
       };
     }
-    const kind = await em.create(TaskKind, {name});
+    const kind = await this.taskKindRepo.create({name});
 
-    await em.save(kind);
+    await this.taskKindRepo.save(kind);
 
     return {
       kind,
@@ -32,26 +40,23 @@ export class TaskKindResolver {
   }
 
   @Mutation(() => TaskKind, {nullable: true})
-  async updateTaskKind(
-    @Arg('options') options: TaskKindUpdateInput,
-    @Ctx() {em}: MyContext
-  ) {
-    const taskKind = await em.findOne(TaskKind, {id: options.id});
+  async updateTaskKind(@Arg('options') options: TaskKindUpdateInput) {
+    const taskKind = await this.taskKindRepo.findOne({id: options.id});
     if (!taskKind) {
       return null;
     }
 
     taskKind.name = options.name;
 
-    await em.save(taskKind);
+    await this.taskKindRepo.save(taskKind);
 
     return taskKind;
   }
 
   @Mutation(() => Boolean)
-  async deleteTaskKind(@Arg('id') id: number, @Ctx() {em}: MyContext) {
+  async deleteTaskKind(@Arg('id') id: number) {
     try {
-      await em.delete(TaskKind, {id});
+      await this.taskKindRepo.delete({id});
     } catch (err) {
       console.log(err);
       return false;

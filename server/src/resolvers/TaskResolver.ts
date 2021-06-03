@@ -1,20 +1,24 @@
 import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
 import {MoreThan, FindManyOptions} from 'typeorm';
+import {InjectRepository} from 'typeorm-typedi-extensions';
 
-import {User} from '../entities/User';
-import {MyContext} from '../types';
+import {RequestContext} from '../types';
 import {Task} from '../entities/Task';
 import {TaskCreateInput} from '../inputs/TaskCreateInput';
 import {TaskUpdateInput} from '../inputs/TaskUpdateInput';
 import {TasksQueryInput} from '../inputs/TasksQueryInput';
+import {TaskRepository} from '../repositories/TaskRepository';
+import {Service} from 'typedi';
 
+@Service()
 @Resolver()
 export class TaskResolver {
+  constructor(
+    @InjectRepository(TaskRepository) private readonly taskRepo: TaskRepository
+  ) {}
+
   @Query(() => [Task])
-  async tasks(
-    @Arg('options') options: TasksQueryInput,
-    @Ctx() {em}: MyContext
-  ) {
+  async tasks(@Arg('options') options: TasksQueryInput) {
     const {userId, onlyCompleted, from} = options;
 
     let where: FindManyOptions<Task>['where'] = {};
@@ -41,7 +45,7 @@ export class TaskResolver {
       };
     }
 
-    return await em.find(Task, {
+    return await this.taskRepo.find({
       where,
       order: {createdAt: 'DESC'},
       relations: ['user', 'kind'],
@@ -49,21 +53,21 @@ export class TaskResolver {
   }
 
   @Query(() => Task, {nullable: true})
-  task(@Arg('id') id: number, @Ctx() {em}: MyContext) {
-    return em.findOne(Task, {id}, {relations: ['user', 'kind']});
+  task(@Arg('id') id: number) {
+    return this.taskRepo.findOne({id}, {relations: ['user', 'kind']});
   }
 
   @Mutation(() => Task)
   async createTask(
     @Arg('options') options: TaskCreateInput,
-    @Ctx() {em, req}: MyContext
+    @Ctx() {req}: RequestContext
   ) {
-    const user = await em.findOne(User, {id: req.session.userId});
+    const user = await this.taskRepo.findOne({id: req.session.userId});
     if (!user) return null;
 
-    const task = em.create(Task, {...options, user});
+    const task = this.taskRepo.create({...options, user});
 
-    await em.save(task);
+    await this.taskRepo.save(task);
 
     return task;
   }
@@ -71,9 +75,9 @@ export class TaskResolver {
   @Mutation(() => Task, {nullable: true})
   async updateTask(
     @Arg('options') options: TaskUpdateInput,
-    @Ctx() {em, req}: MyContext
+    @Ctx() {req}: RequestContext
   ) {
-    const task = await em.findOne(Task, {
+    const task = await this.taskRepo.findOne({
       id: options.id,
       user: {id: req.session.userId},
     });
@@ -91,16 +95,16 @@ export class TaskResolver {
       }
     }
     if (isChanged) {
-      await em.save(task);
+      await this.taskRepo.save(task);
     }
 
     return task;
   }
 
   @Mutation(() => Boolean)
-  async deleteTask(@Arg('id') id: number, @Ctx() {em, req}: MyContext) {
+  async deleteTask(@Arg('id') id: number, @Ctx() {req}: RequestContext) {
     try {
-      await em.delete(Task, {id, user: {id: req.session.userId}});
+      await this.taskRepo.delete({id, user: {id: req.session.userId}});
     } catch (err) {
       console.error(err);
       return false;
