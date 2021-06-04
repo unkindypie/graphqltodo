@@ -24,7 +24,7 @@ const config = {
   synchronize: false,
   migrationsRun: true,
   migrationsTableName: 'migrations_table',
-  migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
+  migrations: [__dirname + '/migrations/**/*.ts'],
   cli: {
     migrationsDir: 'migrations',
   },

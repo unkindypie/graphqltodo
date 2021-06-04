@@ -1,22 +1,26 @@
 version: "3.7"
 
 services:
-  redis:
+  todoapp_redis:
     image: redis
-    container_name: redis
+    container_name: todoapp_redis
     networks:
       - webnet
-  db:
-    container_name: db
+  todoapp_db:
+    container_name: todoapp_db
     image: postgres
     networks:
       - webnet
+    # постгре выполняет скрипты, замаунченые в этом каталоге
+    volumes:
+      - ./server/pg-init-scripts:/docker-entrypoint-initdb.d
     environment:
+      # POSTGRES_DB: ${DBNAME}
+      POSTGRES_MULTIPLE_DATABASES: ${DBNAME},${DBNAME}_test
       POSTGRES_USER: ${DBUSER}
       POSTGRES_PASSWORD: ${DBPASSWORD}
-      POSTGRES_DB: ${DBNAME}
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
   todoapp_server:
     build:
       context: ./server
@@ -30,16 +34,16 @@ services:
     environment:
       # это локальные юрлы сервисов внутри докеровской сети, нужно юзать их
       # вместо локалхоста
-      DB_HOST: db
-      REDIS_HOST: redis
+      DB_HOST: todoapp_db
+      REDIS_HOST: todoapp_redis
       # маунчу src папки проекта как src в докер контейнере чтобы
       # работал hot reload. При изменение чего-либо в рут директории
       # надо заново билдить контейнер.
     volumes:
       - ./server/src:/home/node/app/src
     depends_on:
-      - db
-      - redis
+      - todoapp_db
+      - todoapp_redis
     env_file:
       - .env
     command: ["npm", "run", "dev"]

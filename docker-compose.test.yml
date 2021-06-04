@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+  todoapp_redis:
+    image: redis
+    container_name: todoapp_redis
+    networks:
+      - webnet
+  todoapp_db:
+    container_name: todoapp_db
+    image: postgres
+    networks:
+      - webnet
+    # постгре выполняет скрипты, замаунченые в этом каталоге
+    volumes:
+      - ./server/pg-init-scripts:/docker-entrypoint-initdb.d
+    environment:
+      # POSTGRES_DB: ${DBNAME}
+      POSTGRES_MULTIPLE_DATABASES: ${DBNAME},${DBNAME}_test
+      POSTGRES_USER: ${DBUSER}
+      POSTGRES_PASSWORD: ${DBPASSWORD}
+  todoapp_test_server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: unit-tests
+    container_name: todoapp_test_server
+    networks:
+      - webnet
+    environment:
+      DB_HOST: todoapp_db
+      REDIS_HOST: todoapp_redis
+    volumes:
+      # для хотрелоада
+      - ./server/src:/home/node/app/src
+      # для того чтоб работал jest --watch
+      - ./.git:/home/node/.git
+    depends_on:
+      - todoapp_db
+      - todoapp_redis
+    env_file:
+      - .env
+    command: ["npm", "run", "test:watch"]
+    # эти две опции делают логи цветными
+    tty: true
+    stdin_open: false
+networks:
+  webnet:

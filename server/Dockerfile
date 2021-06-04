@@ -9,9 +9,19 @@ RUN npm install
 COPY . .
 
 
-# prdocution
+# продакшн
 FROM base as production
 
-# ENV NODE_PATH=./build
 RUN npm run compile
+
+# юнит/интегрейшн тесты
+FROM base as unit-tests
+# чтобы jest подхватил ченжи
+ENV GIT_WORK_TREE=/home/node/app GIT_DIR=/home/node/.git
+
+# RUN apk update && \
+#     apk add git
+
+RUN apt-get update && \
+    apt-get install git
 

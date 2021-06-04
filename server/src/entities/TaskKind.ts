@@ -1,6 +1,8 @@
 import {Entity, Column, PrimaryGeneratedColumn} from 'typeorm';
 import {Field, Int, ObjectType} from 'type-graphql';
 
+import {IdType} from '../modules/core/types/CommonEntityTypes';
+
 // export type TaskKindType = 'appointment' | 'event' | 'reminder';
 export type TaskKindType = string;
 
@@ -9,7 +11,7 @@ export type TaskKindType = string;
 export class TaskKind {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
-  id!: number;
+  id!: IdType;
 
   @Field()
   @Column({type: 'text', unique: true})

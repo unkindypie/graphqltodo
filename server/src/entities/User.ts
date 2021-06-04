@@ -8,13 +8,14 @@ import {
 import {ObjectType, Field, Int} from 'type-graphql';
 
 import {Task} from './Task';
+import {IdType} from '../modules/core/types/CommonEntityTypes';
 
 @Entity()
 @ObjectType()
 export class User {
   @PrimaryGeneratedColumn()
   @Field(() => Int)
-  id!: number;
+  id!: IdType;
 
   @Field(() => String)
   @Column({

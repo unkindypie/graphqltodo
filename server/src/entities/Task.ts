@@ -9,13 +9,14 @@ import {ObjectType, Field, Int} from 'type-graphql';
 
 import {TaskKind} from './TaskKind';
 import {User} from './User';
+import {IdType} from '../modules/core/types/CommonEntityTypes';
 
 @ObjectType()
 @Entity()
 export class Task {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
-  id!: number;
+  id!: IdType;
 
   @Field(() => String)
   @Column({type: 'timestamptz'})
