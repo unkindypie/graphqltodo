@@ -19,9 +19,6 @@ FROM base as unit-tests
 # чтобы jest подхватил ченжи
 ENV GIT_WORK_TREE=/home/node/app GIT_DIR=/home/node/.git
 
-# RUN apk update && \
-#     apk add git
-
 RUN apt-get update && \
     apt-get install git
 

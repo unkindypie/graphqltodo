@@ -7,10 +7,6 @@ import {User} from './entities/User';
 import {TaskKind} from './entities/TaskKind';
 import {__prod__} from './constants';
 
-console.log(
-  `TypeORM is configured to connect to: ${process.env.DBNAME} with ${process.env.DBUSER}:${process.env.DBPASSWORD}, host: ${process.env.DB_HOST}`
-);
-
 const config = {
   type: 'postgres',
   entities: [Task, TaskKind, User],

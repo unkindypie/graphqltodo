@@ -10,12 +10,14 @@ import {RequestContext} from '../core/types/RequestContext';
 import {User} from '../../entities/User';
 import {UserRepository} from './repositories/UserRepository';
 import {Service} from 'typedi';
+import {AuthService} from './services/AuthService';
 
 @Service()
 @Resolver()
 export class UserResolver {
   constructor(
-    @InjectRepository(UserRepository) private readonly userRepo: UserRepository
+    @InjectRepository() private readonly userRepo: UserRepository,
+    private readonly authService: AuthService
   ) {}
 
   @Query(() => UserResponse, {nullable: false})
@@ -34,7 +36,7 @@ export class UserResolver {
   async users(@Ctx() {req}: RequestContext) {
     const users = await this.userRepo.find({
       where: {
-        id: Not(req.session.userId),
+        id: Not(req?.session?.userId),
       },
     });
 
@@ -46,10 +48,12 @@ export class UserResolver {
     @Arg('options') options: UsernamePasswordInput,
     @Ctx() {req}: RequestContext
   ) {
-    const existingUser = await this.userRepo.findOne({
-      username: options.username,
-    });
-    if (existingUser) {
+    const user = await this.authService.createUser(
+      options.username,
+      options.password
+    );
+
+    if (!user) {
       return {
         errors: [
           {
@@ -59,13 +63,6 @@ export class UserResolver {
         ],
       };
     }
-
-    const hashedPassword = await argon2.hash(options.password);
-    const user = await this.userRepo.create({
-      username: options.username,
-      password: hashedPassword,
-    });
-    await this.userRepo.save(user);
 
     req.session.userId = user.id;
 
@@ -77,7 +74,11 @@ export class UserResolver {
     @Arg('options') options: UsernamePasswordInput,
     @Ctx() {req}: RequestContext
   ) {
-    const user = await this.userRepo.findOne({username: options.username});
+    const user = await this.authService.verify(
+      options.username,
+      options.password
+    );
+
     if (!user) {
       return {
         errors: [
@@ -92,48 +93,21 @@ export class UserResolver {
         ],
       };
     }
-    const valid = await argon2.verify(user.password, options.password);
-    if (!valid) {
-      return {
-        errors: [
-          {
-            field: 'username',
-            message: 'password or login is invalid.',
-          },
-          {
-            field: 'password',
-            message: 'password or login is invalid.',
-          },
-        ],
-      };
-    }
 
     req.session.userId = user.id;
 
-    await this.userRepo.save(user);
     return {user};
   }
 
   @Mutation(() => Boolean)
-  async logout(@Ctx() {req, res}: RequestContext) {
-    return new Promise(resolve =>
-      req.session.destroy(err => {
-        res.clearCookie(process.env.AUTH_COOKIE_NAME as string);
-
-        if (err) {
-          console.log(err);
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      })
-    );
+  async logout(@Ctx() context: RequestContext) {
+    return await this.authService.removeSession(context);
   }
 
   @Mutation(() => Boolean)
   async removeAccount(@Arg('id') id: number, @Ctx() {req}: RequestContext) {
     const requestedBy = await this.userRepo.findOne({id: req.session.userId});
-    if (!requestedBy?.isAdmin) {
+    if (!requestedBy?.isAdmin || req.session.userId === id) {
       return false;
     }
 

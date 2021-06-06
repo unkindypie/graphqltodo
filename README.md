@@ -11,7 +11,7 @@ Some things that I did here:
 - Code generation(of React hooks) from GraphQL schema
 - Auth via http-only cookies with sessions stored in redis
 - All in typescript
-- DI and integration tests (in backend)
+- DI and integration & unit tests (in backend)
 - All put inside docker (including tests in watch mode)
 
 ## Installation

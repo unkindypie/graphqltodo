@@ -1,0 +1,46 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run:Tests:Backend",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.test.yml up",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build:Tests",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.test.yml build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run:Dev",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.yml up",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build:Dev",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.yml build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}

@@ -54,16 +54,22 @@ export class Application {
   }
 
   static createDBConnection() {
+    console.log(
+      `TypeORM is configured to connect to: ${process.env.DBNAME} with ${process.env.DBUSER}:${process.env.DBPASSWORD}, host: ${process.env.DB_HOST}`
+    );
+
     useContainer(Container);
     return createConnection(typeormConfig);
   }
 
-  static createTestDBConnection(drop = false) {
+  static createTestDBConnection({drop = false} = {}) {
     useContainer(Container);
     const ormTestConfig = {
       ...typeormConfig,
       database: ((typeormConfig.database ?? 'db') + '_test') as any,
       dropSchema: drop,
+      migrationsRun: drop,
+      logging: false,
     };
 
     return createConnection(ormTestConfig);
@@ -83,7 +89,15 @@ export class Application {
     });
   }
 
-  static async createTestApolloServer(context: any) {
+  static async createTestApolloServer(
+    context: RequestContext | ((...params: any[]) => RequestContext) = ({
+      req,
+      res,
+    }): RequestContext => ({
+      req: req as any,
+      res,
+    })
+  ) {
     return new ApolloServer({
       schema: await buildSchema({
         resolvers: [TaskResolver, UserResolver, TaskKindResolver],
