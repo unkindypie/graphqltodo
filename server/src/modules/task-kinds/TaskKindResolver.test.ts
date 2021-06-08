@@ -51,7 +51,7 @@ describe('TaskKindResolver', () => {
               field
               message
             }
-          }  
+          }
         }
       `,
       variables: {name: 'Dummy_kind'},
@@ -97,7 +97,7 @@ describe('TaskKindResolver', () => {
               field
               message
             }
-          }  
+          }
         }
       `,
       variables: {name: 'Dummy_kind'},
@@ -119,7 +119,7 @@ describe('TaskKindResolver', () => {
           updateTaskKind(options: $options) {
             id
             name
-          }  
+          }
         }
       `,
       variables: {options: {id: 1, name: `i'm changed`}},
@@ -155,7 +155,7 @@ describe('TaskKindResolver', () => {
           updateTaskKind(options: $options) {
             id
             name
-          }  
+          }
         }
       `,
       variables: {options: {id: 123, name: `i'm changed`}},

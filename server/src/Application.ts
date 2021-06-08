@@ -8,7 +8,6 @@ import {ApolloServer} from 'apollo-server-express';
 import {buildSchema} from 'type-graphql';
 import cors from 'cors';
 import {Container} from 'typeorm-typedi-extensions';
-// import {Container} from 'typedi'
 
 import typeormConfig from './ormconfig';
 import {__prod__} from './constants';
@@ -16,8 +15,11 @@ import {RequestContext} from './modules/core/types/RequestContext';
 import {TaskResolver} from './modules/tasks/TaskResolver';
 import {UserResolver} from './modules/users/UserResolver';
 import {TaskKindResolver} from './modules/task-kinds/TaskKindResolver';
+import {sleep} from './modules/core/utils/sleep';
 
 export class Application {
+  static didConnectionFailedFirstTime: boolean;
+
   static async startup() {
     await this.createDBConnection();
     const app = express();
@@ -36,6 +38,7 @@ export class Application {
           maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years ^_^
           httpOnly: true, // нет доступа к куки из js
           secure: __prod__, // куки будет только для https
+          // secure: false,
           sameSite: 'lax',
         },
         saveUninitialized: false,
@@ -53,13 +56,14 @@ export class Application {
     });
   }
 
-  static createDBConnection() {
-    console.log(
-      `TypeORM is configured to connect to: ${process.env.DBNAME} with ${process.env.DBUSER}:${process.env.DBPASSWORD}, host: ${process.env.DB_HOST}`
-    );
-
+  static async createDBConnection() {
     useContainer(Container);
-    return createConnection(typeormConfig);
+    try {
+      return await createConnection(typeormConfig);
+    } catch (err) {
+      await sleep(5000);
+      return await createConnection(typeormConfig);
+    }
   }
 
   static createTestDBConnection({drop = false} = {}) {
@@ -67,6 +71,7 @@ export class Application {
     const ormTestConfig = {
       ...typeormConfig,
       database: ((typeormConfig.database ?? 'db') + '_test') as any,
+      migrations: [__dirname + '/migrations/**/*.ts'],
       dropSchema: drop,
       migrationsRun: drop,
       logging: false,

@@ -11,7 +11,7 @@ services:
     image: postgres
     networks:
       - webnet
-    # постгрес выполняет скрипты, замаунченые в этом каталоге
+    # постгре выполняет скрипты, замаунченые в этом каталоге
     volumes:
       - ./server/pg-init-scripts:/docker-entrypoint-initdb.d
     environment:
@@ -19,43 +19,39 @@ services:
       POSTGRES_MULTIPLE_DATABASES: ${DBNAME},${DBNAME}_test
       POSTGRES_USER: ${DBUSER}
       POSTGRES_PASSWORD: ${DBPASSWORD}
+    # ports:
+    #   - "5432:5432"
   todoapp_server:
     build:
       context: ./server
       dockerfile: Dockerfile
-      target: production
+      target: base
     container_name: todoapp_server
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     networks:
       - webnet
     environment:
+      # это локальные юрлы сервисов внутри докеровской сети, нужно юзать их
+      # вместо локалхоста
       DB_HOST: todoapp_db
       REDIS_HOST: todoapp_redis
-      # TODO: может зафакапить тесты из-за орм конфига
-      NODE_ENV: production
+      # маунчу src папки проекта как src в докер контейнере чтобы
+      # работал hot reload. При изменение чего-либо в рут директории
+      # надо заново билдить контейнер.
+    volumes:
+      - ./server/src:/home/node/app/src
     depends_on:
       - todoapp_db
       - todoapp_redis
     env_file:
       - .env
-    # command: npm run start
-    command:
-      [
-        "bash",
-        "./wait-for-it.sh",
-        "todoapp_db:5432",
-        "--",
-        "npm",
-        "run",
-        "start",
-      ]
-
+    command: ["npm", "run", "dev"]
   todoapp_client:
     build:
       context: ./client
       dockerfile: Dockerfile
-      target: production
+      target: base
     container_name: todoapp_client
     ports:
       - "3000:3000"
@@ -64,12 +60,13 @@ services:
     environment:
       API_HOST: todoapp_server
       NEXT_PUBLIC_API_PORT: ${SERVER_PORT}
-      # NODE_ENV: production
+    volumes:
+      - ./client/src:/home/node/app/src
     depends_on:
       - todoapp_server
     env_file:
       - .env
-    command: npm run start
+    command: ["npm", "run", "dev"]
 
 networks:
   webnet:

@@ -14,7 +14,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Build:Tests",
+      "label": "Build:Tests:Backend",
       "type": "shell",
       "command": "docker-compose -f docker-compose.test.yml build",
       "presentation": {
@@ -26,7 +26,7 @@
     {
       "label": "Run:Dev",
       "type": "shell",
-      "command": "docker-compose -f docker-compose.yml up",
+      "command": "docker-compose -f docker-compose.dev.yml up",
       "presentation": {
         "reveal": "always",
         "panel": "new"
@@ -36,11 +36,32 @@
     {
       "label": "Build:Dev",
       "type": "shell",
+      "command": "docker-compose -f docker-compose.dev.yml build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run:Prod",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.yml up",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build:Prod",
+      "type": "shell",
       "command": "docker-compose -f docker-compose.yml build",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     }
   ]
 }
